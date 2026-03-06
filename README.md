@@ -4,6 +4,8 @@ Lossless Context Management plugin for [OpenClaw](https://github.com/openclaw/op
 
 ## What it does
 
+Two ways to learn: read the below, or [check out this super cool animated visualization](https://losslesscontext.ai).
+
 When a conversation grows beyond the model's context window, OpenClaw (just like all of the other agents) normally truncates older messages. LCM instead:
 
 1. **Persists every message** in a SQLite database, organized by conversation

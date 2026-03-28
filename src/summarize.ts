@@ -137,10 +137,7 @@ function resolveProviderApiFromLegacyConfig(
   return undefined;
 }
 
-/** Approximate token estimate used for target-sizing prompts. */
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
-}
+import { estimateTokens } from "./estimate-tokens.js";
 
 /** Narrow unknown values to plain object records. */
 function isRecord(value: unknown): value is Record<string, unknown> {

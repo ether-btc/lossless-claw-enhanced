@@ -81,10 +81,7 @@ type CondensedPhaseCandidate = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Estimate token count from character length (~4 chars per token). */
-function estimateTokens(content: string): number {
-  return Math.ceil(content.length / 4);
-}
+import { estimateTokens } from "./estimate-tokens.js";
 
 /** Format a timestamp as `YYYY-MM-DD HH:mm TZ` for prompt source text. */
 export function formatTimestamp(value: Date, timezone: string = "UTC"): string {

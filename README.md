@@ -161,9 +161,10 @@ LCM uses an LLM to generate summaries during compaction. You can use **any model
 
 **Configuration priority** (highest to lowest):
 
-1. Environment variables `LCM_SUMMARY_MODEL` + `LCM_SUMMARY_PROVIDER`
+1. Environment variables `LCM_SUMMARY_MODEL` (+ optional `LCM_SUMMARY_PROVIDER`)
 2. Plugin config `summaryModel` (+ optional `summaryProvider`)
-3. Falls back to the current agent's model/provider
+3. `agents.defaults.compaction.model` in OpenClaw gateway config
+4. Falls back to the current agent's session model/provider
 
 **Format:** Use the standard OpenClaw `provider/model` string:
 
@@ -174,25 +175,27 @@ LCM uses an LLM to generate summaries during compaction. You can use **any model
 **Examples with different providers:**
 
 ```jsonc
-// Anthropic
+// Anthropic (recommended — fast, cheap, good at summarization)
 "summaryModel": "anthropic/claude-haiku-4-5"
 
 // OpenAI
-"summaryModel": "openai/gpt-5.4"
+"summaryModel": "openai/gpt-4o-mini"
 
 // Google
-"summaryModel": "google/gemini-3.1-pro-preview"
+"summaryModel": "google/gemini-2.5-flash"
 
 // DeepSeek
 "summaryModel": "deepseek/deepseek-chat"
 
 // Or via environment variable
-// LCM_SUMMARY_MODEL=openai/gpt-5.4
+// LCM_SUMMARY_MODEL=anthropic/claude-haiku-4-5
 ```
+
+> **Note:** Model IDs depend on your OpenClaw provider configuration. Check your gateway's model catalog (`openclaw agents list` or `agents.defaults.models` in config) for available model IDs. The examples above use common upstream provider IDs which may differ from aliased names in your setup.
 
 > **Note:** `LCM_SUMMARY_PROVIDER` is a legacy env var for when the model string does not include a provider prefix. Prefer the `provider/model` format instead.
 
-**Choosing a model:** Summarization is a high-volume, low-complexity task — a fast, cheap model works best. We recommend `anthropic/claude-haiku-4-5` or `openai/gpt-5.4`. Using a large model (Opus, GPT-5.4-pro) works but adds cost and latency with no meaningful quality gain for compaction.
+**Choosing a model:** Summarization is a high-volume, low-complexity task — a fast, cheap model works best. We recommend Anthropic Haiku or a similar small/fast model. Using a large model (Opus, GPT-4o) works but adds cost and latency with no meaningful quality gain for compaction.
 
 ## Development
 

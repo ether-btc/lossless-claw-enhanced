@@ -1228,5 +1228,40 @@ describe("createLcmSummarizeFromLegacyParams", () => {
       expect(prompt).toContain("numeric ranges");
       expect(prompt).toContain("percentage thresholds");
     });
+
+    async function getCondensedPromptAtDepth(depth: number): Promise<string> {
+      const deps = makeDeps();
+      const summarize = await createSummarizeFn({
+        deps,
+        legacyParams: { provider: "anthropic", model: "claude-haiku-4-5" },
+      });
+      await summarize!("A".repeat(8_000), false, { isCondensed: true, depth });
+      const completeMock = vi.mocked(deps.complete);
+      return completeMock.mock.calls[0]?.[0]?.messages?.[0]?.content as string;
+    }
+
+    it("D2 prompt preserves verbatim technical names and numeric values", async () => {
+      const prompt = await getCondensedPromptAtDepth(2);
+      expect(prompt).toContain("copy verbatim");
+      expect(prompt).toContain("Numeric ranges");
+    });
+
+    it("D2 prompt does not blanket-drop identifiers", async () => {
+      const prompt = await getCondensedPromptAtDepth(2);
+      expect(prompt).not.toContain("Identifiers that are no longer relevant");
+      expect(prompt).toContain("confirmed superseded");
+    });
+
+    it("D3+ prompt preserves verbatim technical names and numeric values", async () => {
+      const prompt = await getCondensedPromptAtDepth(3);
+      expect(prompt).toContain("verbatim");
+      expect(prompt).toContain("Numeric values");
+    });
+
+    it("D3+ prompt qualifies reference dropping with 'confirmed no longer needed'", async () => {
+      const prompt = await getCondensedPromptAtDepth(3);
+      expect(prompt).not.toContain("Specific references unless essential for continuation");
+      expect(prompt).toContain("confirmed no longer needed");
+    });
   });
 });

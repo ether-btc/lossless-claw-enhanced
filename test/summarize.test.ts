@@ -1154,4 +1154,79 @@ describe("createLcmSummarizeFromLegacyParams", () => {
       expect(vi.mocked(deps.complete)).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("prompt recall-accuracy instructions", () => {
+    async function getPromptText(
+      mode: "normal" | "aggressive" | "condensed",
+    ): Promise<string> {
+      const deps = makeDeps();
+      const summarize = await createSummarizeFn({
+        deps,
+        legacyParams: { provider: "anthropic", model: "claude-opus-4-5" },
+      });
+
+      if (mode === "condensed") {
+        await summarize!("A".repeat(8_000), false, { isCondensed: true });
+      } else {
+        await summarize!("A".repeat(8_000), mode === "aggressive");
+      }
+
+      const completeMock = vi.mocked(deps.complete);
+      return completeMock.mock.calls[0]?.[0]?.messages?.[0]?.content as string;
+    }
+
+    it("normal leaf prompt requires verbatim technical names", async () => {
+      const prompt = await getPromptText("normal");
+      expect(prompt).toContain("NEVER paraphrase or invent alternative names");
+      expect(prompt).toContain("function names, event names");
+    });
+
+    it("normal leaf prompt requires complete rule sets", async () => {
+      const prompt = await getPromptText("normal");
+      expect(prompt).toContain("COMPLETE set of rules");
+      expect(prompt).toContain("state transitions");
+    });
+
+    it("normal leaf prompt requires comparative ranking preservation", async () => {
+      const prompt = await getPromptText("normal");
+      expect(prompt).toContain("ranking ORDER");
+      expect(prompt).toContain("REASONS");
+    });
+
+    it("normal leaf prompt includes numeric ranges and percentage thresholds with examples", async () => {
+      const prompt = await getPromptText("normal");
+      expect(prompt).toContain("numeric ranges (e.g. 1-10, 11-100)");
+      expect(prompt).toContain("percentage thresholds (e.g. 90%)");
+    });
+
+    it("aggressive leaf prompt requires verbatim technical names", async () => {
+      const prompt = await getPromptText("aggressive");
+      expect(prompt).toContain("exact technical names");
+      expect(prompt).toContain("never substitute");
+    });
+
+    it("condensed (D1) prompt requires verbatim technical names", async () => {
+      const prompt = await getPromptText("condensed");
+      expect(prompt).toContain("Exact technical names");
+      expect(prompt).toContain("copy verbatim");
+    });
+
+    it("condensed (D1) prompt requires complete rule sets", async () => {
+      const prompt = await getPromptText("condensed");
+      expect(prompt).toContain("Complete rule sets");
+      expect(prompt).toContain("state machines");
+    });
+
+    it("condensed (D1) prompt requires comparative ranking preservation", async () => {
+      const prompt = await getPromptText("condensed");
+      expect(prompt).toContain("ranking order");
+      expect(prompt).toContain("reasons");
+    });
+
+    it("condensed (D1) prompt includes numeric ranges and percentage thresholds", async () => {
+      const prompt = await getPromptText("condensed");
+      expect(prompt).toContain("numeric ranges");
+      expect(prompt).toContain("percentage thresholds");
+    });
+  });
 });

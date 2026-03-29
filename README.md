@@ -52,24 +52,13 @@ All cherry-picks were reviewed by OpenAI Codex with 3 additional fixes applied:
 
 ## Install
 
-### One-line install from GitHub
-
 ```bash
-openclaw plugins install github:win4r/lossless-claw-enhanced
-```
-
-### Install from local clone
-
-If you want to develop or customize:
-
-```bash
+# Clone and install (link mode — picks up code changes instantly)
 git clone https://github.com/win4r/lossless-claw-enhanced.git
-
-# Link install (symlink, picks up code changes instantly — best for development)
-openclaw plugins install --link /path/to/lossless-claw-enhanced
+openclaw plugins install --link ./lossless-claw-enhanced
 
 # Or copy install (snapshot, won't pick up later changes)
-openclaw plugins install /path/to/lossless-claw-enhanced
+openclaw plugins install ./lossless-claw-enhanced
 ```
 
 ### Configure OpenClaw

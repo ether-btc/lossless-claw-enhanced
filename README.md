@@ -148,8 +148,8 @@ LCM is configured through plugin config and environment variables. Environment v
 | `LCM_FRESH_TAIL_COUNT` | `32` | Messages protected from compaction |
 | `LCM_INCREMENTAL_MAX_DEPTH` | `0` | Compaction cascade depth (`-1` = unlimited) |
 | `LCM_LEAF_CHUNK_TOKENS` | `20000` | Max source tokens per leaf compaction |
-| `LCM_SUMMARY_MODEL` | `""` | Model override for summarization (see below) |
-| `LCM_SUMMARY_PROVIDER` | `""` | Provider override for summarization (see below) |
+| `LCM_SUMMARY_MODEL` | `""` | Model override for summarization, use `provider/model` format (see below) |
+| `LCM_SUMMARY_PROVIDER` | `""` | Legacy provider override; prefer `provider/model` in `LCM_SUMMARY_MODEL` instead |
 | `LCM_IGNORE_SESSION_PATTERNS` | `""` | Glob patterns to exclude from LCM |
 | `LCM_DATABASE_PATH` | `~/.openclaw/lcm.db` | SQLite database path |
 
@@ -165,15 +165,10 @@ LCM uses an LLM to generate summaries during compaction. You can use **any model
 2. Plugin config `summaryModel` (+ optional `summaryProvider`)
 3. Falls back to the current agent's model/provider
 
-**Two ways to specify the model:**
+**Format:** Use the standard OpenClaw `provider/model` string:
 
 ```jsonc
-// Option 1: provider/model in a single string (recommended)
 "summaryModel": "anthropic/claude-haiku-4-5"
-
-// Option 2: separate fields
-"summaryModel": "claude-haiku-4-5",
-"summaryProvider": "anthropic"
 ```
 
 **Examples with different providers:**
@@ -183,19 +178,21 @@ LCM uses an LLM to generate summaries during compaction. You can use **any model
 "summaryModel": "anthropic/claude-haiku-4-5"
 
 // OpenAI
-"summaryModel": "openai/gpt-4o-mini"
+"summaryModel": "openai/gpt-5.4"
 
 // Google
-"summaryModel": "google/gemini-2.5-flash"
+"summaryModel": "google/gemini-3.1-pro-preview"
 
 // DeepSeek
 "summaryModel": "deepseek/deepseek-chat"
 
-// Or via environment variables
-// LCM_SUMMARY_MODEL=gpt-4o-mini LCM_SUMMARY_PROVIDER=openai
+// Or via environment variable
+// LCM_SUMMARY_MODEL=openai/gpt-5.4
 ```
 
-**Choosing a model:** Summarization is a high-volume, low-complexity task — a fast, cheap model works best. We recommend `claude-haiku-4-5` or `gpt-4o-mini`. Using a large model (Opus, GPT-4o) works but adds cost and latency with no meaningful quality gain for compaction.
+> **Note:** `LCM_SUMMARY_PROVIDER` is a legacy env var for when the model string does not include a provider prefix. Prefer the `provider/model` format instead.
+
+**Choosing a model:** Summarization is a high-volume, low-complexity task — a fast, cheap model works best. We recommend `anthropic/claude-haiku-4-5` or `openai/gpt-5.4`. Using a large model (Opus, GPT-5.4-pro) works but adds cost and latency with no meaningful quality gain for compaction.
 
 ## Development
 
